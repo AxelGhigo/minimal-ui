@@ -1,0 +1,42 @@
+[
+    {
+        "id" : 1,
+        "avatarUrl" : 1,
+        "name" : "axel maccarini",
+        "email": "mario.rossi@email.com",
+        "password": "test123",
+        "isVerified" : true,
+        "status" : "banned",
+        "role" : "Leader"
+    },
+    {
+        "id": 2,
+        "avatarUrl" : 2,
+        "name": "Mario Rossi",
+        "email": "mario.rossi@email.com",
+        "password": "password123",
+        "isVerified" : true,
+        "status" : "active",
+        "role" : "Full Stack Develope"
+      },
+      {
+        "id": 3,
+        "avatarUrl" : 3,
+        "name": "Anna Bianchi",
+        "email": "anna.bianchi@email.com",
+        "password": "segreto456",
+        "isVerified" : true,
+        "status" : "active",
+        "role" : "Backend Developer"
+      },
+      {
+        "id": 4,
+        "avatarUrl" : 4,
+        "name": "Luca Verdi",
+        "email": "luca.verdi@email.com",
+        "password": "accesso789",
+        "isVerified" : true,
+        "status" : "active",
+        "role" : "UX Designer"
+      }
+]
