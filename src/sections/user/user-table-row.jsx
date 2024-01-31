@@ -129,13 +129,7 @@ export default function UserTableRow({
                 handlsetInputValue(newInputValue);
               }}
               renderInput={(params) => (
-                <TextField
-                  variant="standard"
-                  {...params}
-                  error={error.role}
-                  label="role"
-                  name="role"
-                />
+                <TextField variant="standard" {...params} error={error.role} name="role" />
               )}
             />
           ) : (

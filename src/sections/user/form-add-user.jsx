@@ -8,6 +8,7 @@ import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
 import Switch from '@mui/material/Switch';
 import Avatar from '@mui/material/Avatar';
+import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import FormGroup from '@mui/material/FormGroup';
 import IconButton from '@mui/material/IconButton';
@@ -24,19 +25,72 @@ import roles from '../../utils/lib/roles.json';
 const Transition = forwardRef((props, ref) => <Slide direction="up" ref={ref} {...props} />);
 
 export default function FormAddUser({ open, handleClose, handleAddUser }) {
-  let ruoli = roles[0];
+  const [inputValue, setInputValue] = useState({
+    avatar: 1,
+    nome: {
+      value: '',
+      error: true,
+    },
+    email: {
+      value: '',
+      error: true,
+    },
+    roles: {
+      input: 'Leader',
+      value: '',
+      error: false,
+    },
+    verified: 'no',
+    active: false,
+  });
 
-  const [inputValue, setInputValue] = useState('');
-
-  const [error, setError] = useState({ email: false, name: false, role: false });
-
-  const [avatar, setAvatar] = useState(1);
-
-  const handleError = (event) => {
-    if (event.target.value === '') {
-      setError({ ...error, [event.target.name]: true });
-    } else setError({ ...error, [event.target.name]: false });
+  const handelChange = (e) => {
+    setInputValue({
+      ...inputValue,
+      [e.target.name]: { value: e.target.value, error: e.target.value === '' },
+    });
   };
+
+  const AntSwitch = styled(Switch)(({ theme }) => ({
+    width: 28,
+    height: 16,
+    padding: 0,
+    display: 'flex',
+    '&:active': {
+      '& .MuiSwitch-thumb': {
+        width: 15,
+      },
+      '& .MuiSwitch-switchBase.Mui-checked': {
+        transform: 'translateX(9px)',
+      },
+    },
+    '& .MuiSwitch-switchBase': {
+      padding: 2,
+      '&.Mui-checked': {
+        transform: 'translateX(12px)',
+        color: '#fff',
+        '& + .MuiSwitch-track': {
+          opacity: 1,
+          backgroundColor: theme.palette.mode === 'dark' ? '#177ddc' : '#1890ff',
+        },
+      },
+    },
+    '& .MuiSwitch-thumb': {
+      boxShadow: '0 2px 4px 0 rgb(0 35 11 / 20%)',
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      transition: theme.transitions.create(['width'], {
+        duration: 200,
+      }),
+    },
+    '& .MuiSwitch-track': {
+      borderRadius: 16 / 2,
+      opacity: 1,
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.25)',
+      boxSizing: 'border-box',
+    },
+  }));
 
   return (
     <Dialog
@@ -45,39 +99,28 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
       keepMounted
       onClose={handleClose}
       aria-describedby="alert-dialog-slide-description"
-      PaperProps={{
-        component: 'form',
-        onSubmit: (event) => {
-          event.preventDefault();
-          const formData = new FormData(event.currentTarget);
-          const formJson = Object.fromEntries(formData.entries());
-          handleAddUser({ ...formJson, role: inputValue, avatar });
-          handleClose();
-          event.target.reset();
-        },
-      }}
     >
       <DialogTitle>New Users</DialogTitle>
       <DialogContent>
         <div style={{ display: 'flex' }}>
           <IconButton
             aria-label="delete"
-            onClick={() => setAvatar(avatar - 1)}
-            disabled={avatar <= 1}
+            onClick={() => setInputValue({ ...inputValue, avatar: inputValue.avatar - 1 })}
+            disabled={inputValue.avatar <= 1}
             size="small"
           >
             <ArrowBackIosNewIcon fontSize="large" />
           </IconButton>
           <Avatar
             alt="Remy Sharp"
-            src={`/assets/images/avatars/avatar_${avatar}.jpg`}
+            src={`/assets/images/avatars/avatar_${inputValue.avatar}.jpg`}
             sx={{ width: 150, height: 150 }}
           />
           <IconButton
             aria-label="delete"
             size="small"
-            onClick={() => setAvatar(avatar + 1)}
-            disabled={avatar >= 25}
+            onClick={() => setInputValue({ ...inputValue, avatar: inputValue.avatar + 1 })}
+            disabled={inputValue.avatar >= 25}
           >
             <ArrowForwardIosIcon fontSize="large" />
           </IconButton>
@@ -87,8 +130,22 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
             }}
             sx={{ m: 4 }}
           >
-            <FormControlLabel name="Verified" control={<Switch />} label="Verified" />
-            <FormControlLabel name="Active" control={<Switch />} label="Active" />
+            <FormControlLabel
+              name="Verified"
+              checked={inputValue.verified === 'yes'}
+              onClick={(event) =>
+                setInputValue({ ...inputValue, verified: event.target.checked ? 'yes' : 'no' })
+              }
+              control={<AntSwitch inputProps={{ 'aria-label': 'ant design' }} />}
+              label="Verified"
+            />
+            <FormControlLabel
+              name="Active"
+              checked={inputValue.active}
+              onClick={(e) => setInputValue({ ...inputValue, active: e.target.checked })}
+              control={<AntSwitch inputProps={{ 'aria-label': 'ant design' }} />}
+              label="Active"
+            />
           </FormGroup>
         </div>
         <TextField
@@ -96,13 +153,13 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
           required
           margin="dense"
           id="name"
-          name="name"
+          name="nome"
           label="Nome"
           type="text"
           fullWidth
           variant="outlined"
-          error={error.name}
-          onChange={handleError}
+          error={inputValue.nome.error}
+          onChange={handelChange}
         />
         <TextField
           required
@@ -113,22 +170,30 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
           type="text"
           fullWidth
           variant="outlined"
-          error={error.email}
-          onChange={handleError}
+          error={inputValue.email.error}
+          onChange={handelChange}
         />
         <Autocomplete
           id="combo-box-demo"
-          value={ruoli}
+          value={inputValue.roles.input}
           onChange={(event, newValue) => {
-            ruoli = newValue;
+            setInputValue({
+              ...inputValue,
+              roles: { ...inputValue.roles, input: newValue },
+            });
           }}
           options={roles}
           sx={{ width: 300, mt: 1 }}
-          inputValue={inputValue}
+          inputValue={inputValue.roles.value}
           onInputChange={(event, newInputValue) => {
-            setInputValue(newInputValue);
+            setInputValue({
+              ...inputValue,
+              roles: { ...inputValue.roles, value: newInputValue, error: newInputValue === '' },
+            });
           }}
-          renderInput={(params) => <TextField {...params} label="roles" />}
+          renderInput={(params) => (
+            <TextField error={inputValue.roles.error} {...params} label="roles" />
+          )}
         />
       </DialogContent>
 
@@ -139,8 +204,31 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
         <Button
           variant="contained"
           color="success"
-          disabled={Object.values(error).some((err) => err)}
-          type="submit"
+          disabled={Object.values(inputValue).some((v) => {
+            if (v.error !== undefined) return v.error;
+            return false;
+          })}
+          onClick={() => {
+            handleAddUser(inputValue);
+            setInputValue({
+              avatar: 1,
+              nome: {
+                value: '',
+                error: true,
+              },
+              email: {
+                value: '',
+                error: true,
+              },
+              roles: {
+                input: 'Leader',
+                value: '',
+                error: false,
+              },
+              verified: 'no',
+              active: false,
+            });
+          }}
         >
           Save
         </Button>
