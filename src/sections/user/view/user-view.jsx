@@ -36,7 +36,7 @@ export default function UserPage() {
 
   const [filterName, setFilterName] = useState('');
 
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [users, setUsers] = useState(utenti);
 
@@ -46,19 +46,27 @@ export default function UserPage() {
     setUsers(users.filter((u) => u.id !== id));
   };
   const handleChangeUser = (row) => {
-    console.log('row', row);
-
+    console.log(row);
     setUsers(
       users.map((user) => {
         if (user.id === row.id) {
-          return row;
+          return {
+            id: row.id,
+            avatarUrl: row.avatar,
+            name: row.nome.value,
+            email: row.email.value,
+            password: row.password.value,
+            isVerified: row.verified === 'yes',
+            status: row.active ? 'active' : 'banned',
+            role: row.roles.value,
+          };
         }
         return user;
       })
     );
   };
-  console.log(users);
 
+  console.log(users);
   const handleAddUser = (user) => {
     console.log(user);
     setUsers(
@@ -67,6 +75,7 @@ export default function UserPage() {
         avatarUrl: user.avatar,
         name: user.nome.value,
         email: user.email.value,
+        password: user.password.value,
         isVerified: user.verified,
         status: user.active ? 'active' : 'banned',
         role: user.roles.value,
@@ -170,6 +179,7 @@ export default function UserPage() {
                   { id: 'name', label: 'Name' },
                   { id: 'email', label: 'Email' },
                   { id: 'role', label: 'Role' },
+                  { id: 'psw', label: 'password' },
                   { id: 'isVerified', label: 'Verified', align: 'center' },
                   { id: 'status', label: 'Status' },
                   { id: '' },
@@ -183,6 +193,7 @@ export default function UserPage() {
                       key={row.id}
                       name={row.name}
                       role={row.role}
+                      psw={row.password}
                       status={row.status}
                       email={row.email}
                       avatarUrl={row.avatarUrl}

@@ -1,4 +1,6 @@
 /* eslint-disable react/jsx-no-constructed-context-values */
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Cookies from 'universal-cookie';
 /* eslint-disable import/no-cycle */
 import { useState, useContext, createContext } from 'react';
 
@@ -10,13 +12,16 @@ const AuthContext = createContext();
 export const AuthData = () => useContext(AuthContext);
 
 export const AuthWrapper = () => {
-  const [user, setUser] = useState({ useremail: '', isAuthenticated: false });
+  const cookies = new Cookies();
+
+  const [user, setUser] = useState(cookies.get('__User') || { isAuthenticated: false });
 
   const login = (email, password) =>
     new Promise((resolve, reject) => {
       utenti.forEach((e) => {
         if (e.email === email && e.password === password && e.status === 'active') {
           setUser({ ...e, useremail: email, isAuthenticated: true });
+          cookies.set('__User', JSON.stringify({ ...e, useremail: email, isAuthenticated: true }));
           resolve('success');
         }
       });
@@ -25,6 +30,7 @@ export const AuthWrapper = () => {
     });
 
   const logout = () => {
+    cookies.remove('__User');
     setUser({ ...user, isAuthenticated: false });
   };
 

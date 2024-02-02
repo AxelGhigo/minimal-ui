@@ -5,11 +5,15 @@ import Box from '@mui/material/Box';
 import Link from '@mui/material/Link';
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
+import Alert from '@mui/material/Alert';
 import Button from '@mui/material/Button';
 import Divider from '@mui/material/Divider';
+import Collapse from '@mui/material/Collapse';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
+import AlertTitle from '@mui/material/AlertTitle';
 import LoadingButton from '@mui/lab/LoadingButton';
 import { alpha, useTheme } from '@mui/material/styles';
 import InputAdornment from '@mui/material/InputAdornment';
@@ -37,16 +41,14 @@ export default function LoginView() {
     password: '',
   });
 
-  const [errorMessage, setErrorMessage] = useState(null);
-
-  console.log(errorMessage);
+  const [errorMessage, setErrorMessage] = useState('');
 
   const doLogin = async () => {
     try {
       await login(formData.useremail, formData.password);
       router.push('/');
     } catch (error) {
-      setErrorMessage(error);
+      setErrorMessage('Usernamo o password non validi');
     }
   };
 
@@ -169,6 +171,28 @@ export default function LoginView() {
               OR
             </Typography>
           </Divider>
+
+          <Collapse in={errorMessage !== ''}>
+            <Alert
+              severity="error"
+              action={
+                <IconButton
+                  aria-label="close"
+                  color="error"
+                  size="small"
+                  onClick={() => {
+                    setErrorMessage('');
+                  }}
+                >
+                  <CloseIcon fontSize="inherit" />
+                </IconButton>
+              }
+              sx={{ mb: 2 }}
+            >
+              <AlertTitle>Error</AlertTitle>
+              {errorMessage}
+            </Alert>
+          </Collapse>
 
           {renderForm}
         </Card>

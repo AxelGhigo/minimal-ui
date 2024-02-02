@@ -12,10 +12,16 @@ import { styled } from '@mui/material/styles';
 import TextField from '@mui/material/TextField';
 import FormGroup from '@mui/material/FormGroup';
 import IconButton from '@mui/material/IconButton';
+import InputLabel from '@mui/material/InputLabel';
 import DialogTitle from '@mui/material/DialogTitle';
+import FormControl from '@mui/material/FormControl';
 import Autocomplete from '@mui/material/Autocomplete';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
+import Visibility from '@mui/icons-material/Visibility';
+import OutlinedInput from '@mui/material/OutlinedInput';
+import InputAdornment from '@mui/material/InputAdornment';
+import VisibilityOff from '@mui/icons-material/VisibilityOff';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
@@ -29,11 +35,15 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
     avatar: 1,
     nome: {
       value: '',
-      error: true,
+      error: false,
     },
     email: {
       value: '',
-      error: true,
+      error: false,
+    },
+    password: {
+      value: '',
+      error: false,
     },
     roles: {
       input: 'Leader',
@@ -44,13 +54,23 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
     active: false,
   });
 
+  const [showPassword, setShowPassword] = useState(false);
+
+  const handleClickShowPassword = () => setShowPassword((show) => !show);
+
+  const handleMouseDownPassword = (event) => {
+    event.preventDefault();
+  };
+
   const handelChange = (e) => {
+    console.log(e.target.name);
     setInputValue({
       ...inputValue,
       [e.target.name]: { value: e.target.value, error: e.target.value === '' },
     });
   };
 
+  // style Switch
   const AntSwitch = styled(Switch)(({ theme }) => ({
     width: 28,
     height: 16,
@@ -160,6 +180,7 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
           variant="outlined"
           error={inputValue.nome.error}
           onChange={handelChange}
+          value={inputValue.nome.value}
         />
         <TextField
           required
@@ -172,29 +193,54 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
           variant="outlined"
           error={inputValue.email.error}
           onChange={handelChange}
+          value={inputValue.email.value}
         />
-        <Autocomplete
-          id="combo-box-demo"
-          value={inputValue.roles.input}
-          onChange={(event, newValue) => {
-            setInputValue({
-              ...inputValue,
-              roles: { ...inputValue.roles, input: newValue },
-            });
-          }}
-          options={roles}
-          sx={{ width: 300, mt: 1 }}
-          inputValue={inputValue.roles.value}
-          onInputChange={(event, newInputValue) => {
-            setInputValue({
-              ...inputValue,
-              roles: { ...inputValue.roles, value: newInputValue, error: newInputValue === '' },
-            });
-          }}
-          renderInput={(params) => (
-            <TextField error={inputValue.roles.error} {...params} label="roles" />
-          )}
-        />
+
+        <FormControl sx={{ my: 1, width: '25ch' }} style={{ display: 'flex' }} variant="outlined">
+          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+          <OutlinedInput
+            id="outlined-adornment-password"
+            type={showPassword ? 'text' : 'password'}
+            onChange={handelChange}
+            value={inputValue.password.value}
+            endAdornment={
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  onMouseDown={handleMouseDownPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            }
+            label="Password"
+            name="password"
+          />
+          <Autocomplete
+            id="combo-box-demo"
+            value={inputValue.roles.input}
+            onChange={(event, newValue) => {
+              setInputValue({
+                ...inputValue,
+                roles: { ...inputValue.roles, input: newValue },
+              });
+            }}
+            options={roles}
+            sx={{ width: '25ch', my: 1 }}
+            inputValue={inputValue.roles.value}
+            onInputChange={(event, newInputValue) => {
+              setInputValue({
+                ...inputValue,
+                roles: { ...inputValue.roles, value: newInputValue, error: newInputValue === '' },
+              });
+            }}
+            renderInput={(params) => (
+              <TextField error={inputValue.roles.error} {...params} label="roles" />
+            )}
+          />
+        </FormControl>
       </DialogContent>
 
       <DialogActions>
@@ -205,7 +251,7 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
           variant="contained"
           color="success"
           disabled={Object.values(inputValue).some((v) => {
-            if (v.error !== undefined) return v.error;
+            if (v.value !== undefined) return v.value === '';
             return false;
           })}
           onClick={() => {
@@ -214,11 +260,15 @@ export default function FormAddUser({ open, handleClose, handleAddUser }) {
               avatar: 1,
               nome: {
                 value: '',
-                error: true,
+                error: false,
               },
               email: {
                 value: '',
-                error: true,
+                error: false,
+              },
+              password: {
+                value: '',
+                error: false,
               },
               roles: {
                 input: 'Leader',
