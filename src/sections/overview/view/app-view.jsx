@@ -1,64 +1,155 @@
+/* eslint-disable import/no-unresolved */
 import { faker } from '@faker-js/faker';
+import { useState, useEffect } from 'react';
 
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
+import { nowDate } from 'src/utils/format-time';
+import { callPaymentAPI } from 'src/utils/lib/callAPI/payment';
+
 import Iconify from 'src/components/iconify';
 
 import AppTasks from '../app-tasks';
 import AppNewsUpdate from '../app-news-update';
+import AppParentRent from '../app-parent-rent';
 import AppOrderTimeline from '../app-order-timeline';
 import AppCurrentVisits from '../app-current-visits';
 import AppWebsiteVisits from '../app-website-visits';
 import AppWidgetSummary from '../app-widget-summary';
 import AppTrafficBySite from '../app-traffic-by-site';
 import AppCurrentSubject from '../app-current-subject';
+import AppWidgetBilancio from '../app-widget-bnilancio';
 import AppConversionRates from '../app-conversion-rates';
+import AppWidgetSumAllRent from '../app-widget-someAllRent';
 
 // ----------------------------------------------------------------------
 
 export default function AppView() {
+  const [payment, setPayment] = useState({
+    data: {
+      anno: 0,
+      mese: 0,
+      add: [],
+      spent: [],
+    },
+  });
+
+  const [loadig, setLoadig] = useState(true);
+
+  const handelDelet = (id) => {
+    callPaymentAPI
+      .delete(id)
+      .then((response) => response.json())
+      .then(() =>
+        callPaymentAPI
+          .getAll()
+          .then((response) => response.json())
+          .then((data) => setPayment(data))
+          .catch((error) => console.error(error))
+      )
+      .catch((error) => console.error(error));
+  };
+
+  const handelAdd = (valore, description, operation) => {
+    const date = new Date();
+    console.log(valore, description, operation);
+    callPaymentAPI
+      .create({
+        value: valore * 100,
+        description,
+        operation,
+        createDate: nowDate(),
+        mese: date.getMonth() + 1,
+        anno: date.getFullYear(),
+      })
+      .then((response) => response.json())
+      .then(() =>
+        callPaymentAPI
+          .getAll()
+          .then((response) => response.json())
+          .then((data) => setPayment(data))
+          .catch((error) => console.error(error))
+      )
+      .catch((error) => console.error(error));
+  };
+
+  useEffect(() => {
+    callPaymentAPI
+      .getAll()
+      .then((response) => response.json())
+      .then((data) => {
+        setPayment(data);
+        setLoadig(false);
+      })
+      .catch((error) => console.error(error));
+  }, []);
+
+  console.log(payment);
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
         Hi, Welcome back 👋
       </Typography>
 
-      <Grid container spacing={3}>
-        <Grid xs={12} sm={6} md={3}>
+      <Grid container spacing={2}>
+        <Grid xs={6} sm={6} md={3}>
           <AppWidgetSummary
-            title="Weekly Sales"
-            total={714000}
+            title="Mese corrente"
+            total={payment.data.mese}
             color="success"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AppWidgetSummary
-            title="New Users"
-            total={1352831}
+        <Grid xs={6} sm={6} md={3}>
+          <AppWidgetBilancio
+            title="Bilancio mese"
+            total={payment.data}
+            color="error"
+            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
+          />
+        </Grid>
+
+        <Grid xs={6} sm={6} md={3}>
+          <AppWidgetSumAllRent
+            title="Entrate mese"
+            operation="+"
+            total={payment.data.add}
             color="info"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_users.png" />}
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AppWidgetSummary
-            title="Item Orders"
-            total={1723315}
+        <Grid xs={6} sm={6} md={3}>
+          <AppWidgetSumAllRent
+            title="Uscite mese"
+            operation="-"
+            total={payment.data.spent}
             color="warning"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_buy.png" />}
           />
         </Grid>
 
-        <Grid xs={12} sm={6} md={3}>
-          <AppWidgetSummary
-            title="Bug Reports"
-            total={234}
-            color="error"
-            icon={<img alt="icon" src="/assets/icons/glass/ic_glass_message.png" />}
+        <Grid xs={12} sm={10} md={6}>
+          <AppParentRent
+            title="Aggiunti"
+            list={payment.data.add}
+            operation="+"
+            handelDelet={handelDelet}
+            handelAdd={handelAdd}
+            loadig={loadig}
+          />
+        </Grid>
+        <Grid xs={12} sm={10} md={6}>
+          <AppParentRent
+            title="Spesi"
+            operation="-"
+            list={payment.data.spent}
+            handelDelet={handelDelet}
+            handelAdd={handelAdd}
+            loadig={loadig}
           />
         </Grid>
 

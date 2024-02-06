@@ -6,7 +6,7 @@
         "email": "mario.rossi@email.com",
         "password": "test123",
         "isVerified" : true,
-        "status" : "banned",
+        "status" : "active",
         "role" : "Leader"
     },
     {
@@ -38,5 +38,15 @@
         "isVerified" : true,
         "status" : "active",
         "role" : "UX Designer"
-      }
+      },
+      {
+        "id" : 666,
+        "avatarUrl" : 25,
+        "name" : "axel maccarini",
+        "email": "root",
+        "password": "root",
+        "isVerified" : true,
+        "status" : "active",
+        "role" : "Leader"
+    }
 ]

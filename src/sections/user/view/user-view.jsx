@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { uniqueId } from 'lodash';
+import { faker } from '@faker-js/faker';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
@@ -36,51 +36,52 @@ export default function UserPage() {
 
   const [filterName, setFilterName] = useState('');
 
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
   const [users, setUsers] = useState(utenti);
 
   const [open, setOpen] = useState(false);
 
-  const [idUser, setIdUser] = useState(null);
-
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
-
-  const handleClose = () => {
-    setIdUser(null);
-    setOpen(false);
-  };
-
   const handleDeletUser = (id) => {
     setUsers(users.filter((u) => u.id !== id));
   };
   const handleChangeUser = (row) => {
-    console.log('row', row);
-
+    console.log(row);
     setUsers(
       users.map((user) => {
         if (user.id === row.id) {
-          return row;
+          return {
+            id: row.id,
+            avatarUrl: row.avatar,
+            name: row.nome.value,
+            email: row.email.value,
+            password: row.password.value,
+            isVerified: row.verified === 'yes',
+            status: row.active ? 'active' : 'banned',
+            role: row.roles.value,
+          };
         }
         return user;
       })
     );
   };
 
+  console.log(users);
   const handleAddUser = (user) => {
+    console.log(user);
     setUsers(
       users.concat({
-        id: uniqueId(),
+        id: faker.string.uuid(),
         avatarUrl: user.avatar,
-        name: user.name,
-        email: user.email,
-        isVerified: user.Verified === 'on',
-        status: user.Active === 'on' ? 'active' : 'banned',
-        role: user.role,
+        name: user.nome.value,
+        email: user.email.value,
+        password: user.password.value,
+        isVerified: user.verified,
+        status: user.active ? 'active' : 'banned',
+        role: user.roles.value,
       })
     );
+    setOpen(false);
   };
 
   const handleSort = (event, id) => {
@@ -146,7 +147,7 @@ export default function UserPage() {
         <Typography variant="h4">Users</Typography>
 
         <Button
-          onClick={handleClickOpen}
+          onClick={() => setOpen(true)}
           variant="contained"
           color="inherit"
           startIcon={<Iconify icon="eva:plus-fill" />}
@@ -155,12 +156,7 @@ export default function UserPage() {
         </Button>
       </Stack>
 
-      <FormAddUser
-        open={open}
-        handleClose={handleClose}
-        fillforchange={dataFiltered[dataFiltered.findIndex((u) => u.id === idUser)]}
-        handleAddUser={handleAddUser}
-      />
+      <FormAddUser open={open} handleClose={() => setOpen(false)} handleAddUser={handleAddUser} />
 
       <Card>
         <UserTableToolbar
@@ -183,6 +179,7 @@ export default function UserPage() {
                   { id: 'name', label: 'Name' },
                   { id: 'email', label: 'Email' },
                   { id: 'role', label: 'Role' },
+                  { id: 'psw', label: 'password' },
                   { id: 'isVerified', label: 'Verified', align: 'center' },
                   { id: 'status', label: 'Status' },
                   { id: '' },
@@ -196,6 +193,7 @@ export default function UserPage() {
                       key={row.id}
                       name={row.name}
                       role={row.role}
+                      psw={row.password}
                       status={row.status}
                       email={row.email}
                       avatarUrl={row.avatarUrl}

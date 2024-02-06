@@ -1,30 +1,44 @@
+/* eslint-disable import/no-unresolved */
 /* eslint-disable react/jsx-no-constructed-context-values */
+// eslint-disable-next-line import/no-extraneous-dependencies
+import Cookies from 'universal-cookie';
 /* eslint-disable import/no-cycle */
 import { useState, useContext, createContext } from 'react';
 
 import Router from 'src/routes/sections';
 
-import utenti from 'src/data/utenti.json';
-
 const AuthContext = createContext();
 export const AuthData = () => useContext(AuthContext);
 
 export const AuthWrapper = () => {
-  const [user, setUser] = useState({ useremail: '', isAuthenticated: false });
+  const cookies = new Cookies();
+
+  const [user, setUser] = useState(cookies.get('__User') || { isAuthenticated: false });
 
   const login = (email, password) =>
     new Promise((resolve, reject) => {
-      utenti.forEach((e) => {
-        if (e.email === email && e.password === password && e.status === 'active') {
-          setUser({ ...e, useremail: email, isAuthenticated: true });
+      fetch('https://api-parent-pay.vercel.app/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      })
+        .then((response) => response.json())
+        .then((res) => {
+          console.log(res);
+          setUser({ ...res.data, isAuthenticated: true });
+          cookies.set(
+            '__User',
+            JSON.stringify({ ...res.data, useremail: email, isAuthenticated: true })
+          );
           resolve('success');
-        }
-      });
-
-      reject(new Error('no logged'));
+        })
+        .catch((error) => reject(new Error(error)));
     });
 
   const logout = () => {
+    cookies.remove('__User');
     setUser({ ...user, isAuthenticated: false });
   };
 

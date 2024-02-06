@@ -3,15 +3,18 @@ import PropTypes from 'prop-types';
 
 import Stack from '@mui/material/Stack';
 import Avatar from '@mui/material/Avatar';
+import Switch from '@mui/material/Switch';
 import Popover from '@mui/material/Popover';
 import TableRow from '@mui/material/TableRow';
 import Checkbox from '@mui/material/Checkbox';
 import MenuItem from '@mui/material/MenuItem';
+import { styled } from '@mui/material/styles';
 import TableCell from '@mui/material/TableCell';
 import TextField from '@mui/material/TextField';
 import Typography from '@mui/material/Typography';
 import IconButton from '@mui/material/IconButton';
 import Autocomplete from '@mui/material/Autocomplete';
+import FormControlLabel from '@mui/material/FormControlLabel';
 
 import Label from 'src/components/label';
 import Iconify from 'src/components/iconify';
@@ -26,6 +29,7 @@ export default function UserTableRow({
   avatarUrl,
   email,
   role,
+  psw,
   isVerified,
   status,
   handleClick,
@@ -34,44 +38,81 @@ export default function UserTableRow({
 }) {
   const [open, setOpen] = useState(null);
   const [change, setChange] = useState(false);
-  const [row, setRow] = useState({ email, name, avatarUrl, role, isVerified, status });
-  const [inputValue, setInputValue] = useState('');
-  const [error, setError] = useState({ email: false, name: false, role: false });
 
-  const [value, setValue] = useState(role);
+  const [inputValue, setInputValue] = useState({
+    avatar: avatarUrl,
+    nome: {
+      value: name,
+      error: false,
+    },
+    email: {
+      value: email,
+      error: false,
+    },
+    password: {
+      value: psw,
+      error: false,
+    },
+    roles: {
+      input: role,
+      value: role,
+      error: false,
+    },
+    verified: isVerified ? 'yes' : 'no',
+    active: status === 'active',
+  });
 
-  const handleOpenMenu = (event) => setOpen(event.currentTarget);
-
-  const handleChangerow = () => {
-    if (Object.values(error).every((err) => !err)) {
-      handleChangeUser(row);
-      handleCloseMenu(true);
-    }
+  const handelChange = (e) => {
+    console.log(e.target.name);
+    setInputValue({
+      ...inputValue,
+      [e.target.name]: { value: e.target.value, error: e.target.value === '' },
+    });
   };
-  const handleopenChange = () => {
-    setChange(true);
-    setOpen(null);
-  };
 
-  const handleCloseMenu = (isupdate) => {
-    if (isupdate) setChange(false);
-    setOpen(null);
-  };
+  console.log(inputValue);
 
-  const handleRow = (event) => {
-    setRow({ ...row, [event.target.name]: event.target.value });
-    if (event.target.value === '') {
-      setError({ ...error, [event.target.name]: true });
-    } else setError({ ...error, [event.target.name]: false });
-  };
-
-  const handlsetInputValue = (newRole) => {
-    setRow({ ...row, role: newRole });
-    if (newRole === '') {
-      setError({ ...error, role: true });
-    } else setError({ ...error, role: false });
-    setInputValue(newRole);
-  };
+  // style Switch
+  const AntSwitch = styled(Switch)(({ theme }) => ({
+    width: 28,
+    height: 16,
+    padding: 0,
+    display: 'flex',
+    '&:active': {
+      '& .MuiSwitch-thumb': {
+        width: 15,
+      },
+      '& .MuiSwitch-switchBase.Mui-checked': {
+        transform: 'translateX(9px)',
+      },
+    },
+    '& .MuiSwitch-switchBase': {
+      padding: 2,
+      '&.Mui-checked': {
+        transform: 'translateX(12px)',
+        color: '#fff',
+        '& + .MuiSwitch-track': {
+          opacity: 1,
+          backgroundColor: theme.palette.mode === 'dark' ? '#177ddc' : '#1890ff',
+        },
+      },
+    },
+    '& .MuiSwitch-thumb': {
+      boxShadow: '0 2px 4px 0 rgb(0 35 11 / 20%)',
+      width: 12,
+      height: 12,
+      borderRadius: 6,
+      transition: theme.transitions.create(['width'], {
+        duration: 200,
+      }),
+    },
+    '& .MuiSwitch-track': {
+      borderRadius: 16 / 2,
+      opacity: 1,
+      backgroundColor: theme.palette.mode === 'dark' ? 'rgba(255,255,255,.35)' : 'rgba(0,0,0,.25)',
+      boxSizing: 'border-box',
+    },
+  }));
 
   return (
     <>
@@ -88,10 +129,10 @@ export default function UserTableRow({
                 <TextField
                   id="standard-basic"
                   variant="standard"
-                  name="name"
-                  error={error.name}
-                  value={row.name}
-                  onChange={handleRow}
+                  name="nome"
+                  error={inputValue.nome.error}
+                  value={inputValue.nome.value}
+                  onChange={handelChange}
                 />
               ) : (
                 name
@@ -105,9 +146,9 @@ export default function UserTableRow({
               id="standard-basic"
               variant="standard"
               name="email"
-              error={error.email}
-              value={row.email}
-              onChange={handleRow}
+              error={inputValue.email.error}
+              value={inputValue.email.value}
+              onChange={handelChange}
             />
           ) : (
             email
@@ -118,24 +159,24 @@ export default function UserTableRow({
           {change ? (
             <Autocomplete
               id="combo-box-demo"
-              value={value}
+              value={inputValue.roles.input}
               onChange={(event, newValue) => {
-                setValue(newValue);
+                setInputValue({
+                  ...inputValue,
+                  roles: { ...inputValue.roles, input: newValue },
+                });
               }}
               options={roles}
-              sx={{ width: 300, mt: 1 }}
-              inputValue={inputValue}
+              sx={{ width: 200, mt: 1 }}
+              inputValue={inputValue.roles.value}
               onInputChange={(event, newInputValue) => {
-                handlsetInputValue(newInputValue);
+                setInputValue({
+                  ...inputValue,
+                  roles: { ...inputValue.roles, value: newInputValue, error: newInputValue === '' },
+                });
               }}
               renderInput={(params) => (
-                <TextField
-                  variant="standard"
-                  {...params}
-                  error={error.role}
-                  label="role"
-                  name="role"
-                />
+                <TextField error={inputValue.roles.error} {...params} variant="standard" />
               )}
             />
           ) : (
@@ -143,14 +184,55 @@ export default function UserTableRow({
           )}
         </TableCell>
 
-        <TableCell align="center">{isVerified ? 'Yes' : 'No'}</TableCell>
-
         <TableCell>
-          <Label color={(status === 'banned' && 'error') || 'success'}>{status}</Label>
+          {change ? (
+            <TextField
+              id="standard-basic"
+              variant="standard"
+              name="password"
+              error={inputValue.password.error}
+              value={inputValue.password.value}
+              onChange={handelChange}
+            />
+          ) : (
+            '*************'
+          )}
+        </TableCell>
+
+        <TableCell align="center">
+          {change ? (
+            <FormControlLabel
+              name="Verified"
+              labelPlacement="top"
+              checked={inputValue.verified === 'yes'}
+              onClick={(event) =>
+                setInputValue({ ...inputValue, verified: event.target.checked ? 'yes' : 'no' })
+              }
+              control={<AntSwitch inputProps={{ 'aria-label': 'ant design' }} />}
+              label="Verified"
+            />
+          ) : (
+            inputValue.verified
+          )}
+        </TableCell>
+
+        <TableCell align="center">
+          {change ? (
+            <FormControlLabel
+              name="Active"
+              labelPlacement="top"
+              checked={inputValue.active}
+              onClick={(e) => setInputValue({ ...inputValue, active: e.target.checked })}
+              control={<AntSwitch inputProps={{ 'aria-label': 'ant design' }} />}
+              label="Active"
+            />
+          ) : (
+            <Label color={(status === 'banned' && 'error') || 'success'}>{status}</Label>
+          )}
         </TableCell>
 
         <TableCell align="right">
-          <IconButton onClick={handleOpenMenu}>
+          <IconButton onClick={(e) => setOpen(e.currentTarget)}>
             <Iconify icon="eva:more-vertical-fill" />
           </IconButton>
         </TableCell>
@@ -159,19 +241,35 @@ export default function UserTableRow({
         <Popover
           open={!!open}
           anchorEl={open}
-          onClose={() => handleCloseMenu(false)}
+          onClose={() => setOpen(null)}
           anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           PaperProps={{
             sx: { width: 140 },
           }}
         >
-          <MenuItem onClick={handleChangerow} disabled={Object.values(error).some((err) => err)}>
+          <MenuItem
+            onClick={() => {
+              handleChangeUser(inputValue);
+              setOpen(null);
+              setChange(false);
+            }}
+            disabled={Object.values(inputValue).some((v) => {
+              if (v.value !== undefined) return v.value === '';
+              return false;
+            })}
+          >
             <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
             save
           </MenuItem>
 
-          <MenuItem onClick={() => handleCloseMenu(true)} sx={{ color: 'error.main' }}>
+          <MenuItem
+            onClick={() => {
+              setOpen(null);
+              setChange(false);
+            }}
+            sx={{ color: 'error.main' }}
+          >
             <Iconify icon="eva:trash-2-outline" sx={{ mr: 2 }} />
             anulla
           </MenuItem>
@@ -180,14 +278,19 @@ export default function UserTableRow({
         <Popover
           open={!!open}
           anchorEl={open}
-          onClose={() => handleCloseMenu(false)}
+          onClose={() => setOpen(null)}
           anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
           transformOrigin={{ vertical: 'top', horizontal: 'right' }}
           PaperProps={{
             sx: { width: 140 },
           }}
         >
-          <MenuItem onClick={handleopenChange}>
+          <MenuItem
+            onClick={() => {
+              setOpen(null);
+              setChange(true);
+            }}
+          >
             <Iconify icon="eva:edit-fill" sx={{ mr: 2 }} />
             Edit
           </MenuItem>
@@ -213,4 +316,5 @@ UserTableRow.propTypes = {
   role: PropTypes.any,
   selected: PropTypes.any,
   status: PropTypes.string,
+  psw: PropTypes.string,
 };
