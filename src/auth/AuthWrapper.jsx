@@ -26,7 +26,8 @@ export const AuthWrapper = () => {
       })
         .then((response) => response.json())
         .then((res) => {
-          console.log(res);
+          if (res.error) reject(new Error(res.error));
+          console.log('res', res);
           setUser({ ...res.data, isAuthenticated: true });
           cookies.set(
             '__User',
