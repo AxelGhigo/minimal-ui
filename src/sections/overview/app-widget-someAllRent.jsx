@@ -1,15 +1,20 @@
-/* eslint-disable import/no-unresolved */
 import PropTypes from 'prop-types';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Typography from '@mui/material/Typography';
 
-import { numbToMounth } from 'src/utils/format-time';
-
 // ----------------------------------------------------------------------
 
-export default function AppWidgetSummary({ title, total, icon, color = 'primary', sx, ...other }) {
+export default function AppWidgetSumAllRent({
+  title,
+  total,
+  icon,
+  color = 'primary',
+  operation,
+  sx,
+  ...other
+}) {
   return (
     <Card
       component={Stack}
@@ -25,7 +30,11 @@ export default function AppWidgetSummary({ title, total, icon, color = 'primary'
       {...other}
     >
       <Stack spacing={1.5} align="center">
-        <Typography variant="h4">{numbToMounth(total - 1)}</Typography>
+        <Typography variant="h4" color={operation === '+' ? 'success.main' : 'error'}>
+          {`${operation} ${
+            total.map((i) => i.value).reduce((prev, curr) => prev + curr, 0) / 100
+          } €`}
+        </Typography>
 
         <Typography variant="subtitle2" sx={{ color: 'text.disabled' }}>
           {title}
@@ -35,10 +44,11 @@ export default function AppWidgetSummary({ title, total, icon, color = 'primary'
   );
 }
 
-AppWidgetSummary.propTypes = {
+AppWidgetSumAllRent.propTypes = {
   color: PropTypes.string,
   icon: PropTypes.oneOfType([PropTypes.element, PropTypes.string]),
   sx: PropTypes.object,
   title: PropTypes.string,
-  total: PropTypes.number,
+  operation: PropTypes.string,
+  total: PropTypes.array,
 };

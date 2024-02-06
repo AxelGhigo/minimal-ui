@@ -1,3 +1,4 @@
+/* eslint-disable import/no-unresolved */
 /* eslint-disable import/no-cycle */
 import { lazy, Suspense } from 'react';
 import { Outlet, Navigate, useRoutes } from 'react-router-dom';
@@ -17,6 +18,13 @@ export const Page404 = lazy(() => import('src/pages/page-not-found'));
 export default function Router() {
   const { user } = AuthData();
 
+  const elemntChild = [
+    { element: <IndexPage />, index: true, role: '*' },
+    { path: 'user', element: <UserPage />, role: 'Leader' },
+    { path: 'products', element: <ProductsPage />, role: 'Leader' },
+    { path: 'blog', element: <BlogPage />, role: 'Leader' },
+  ];
+
   const routes = useRoutes([
     {
       element: user.isAuthenticated ? (
@@ -28,12 +36,12 @@ export default function Router() {
       ) : (
         <Navigate to="/login" />
       ),
-      children: [
-        { element: <IndexPage />, index: true },
-        { path: 'user', element: <UserPage /> },
-        { path: 'products', element: <ProductsPage /> },
-        { path: 'blog', element: <BlogPage /> },
-      ],
+      children: elemntChild.filter((e) => {
+        if (e.role !== '*') {
+          return e.role === user.role;
+        }
+        return true;
+      }),
     },
     {
       path: 'login',

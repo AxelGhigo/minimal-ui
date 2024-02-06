@@ -6,7 +6,7 @@
         "email": "mario.rossi@email.com",
         "password": "test123",
         "isVerified" : true,
-        "status" : "banned",
+        "status" : "active",
         "role" : "Leader"
     },
     {
@@ -41,7 +41,7 @@
       },
       {
         "id" : 666,
-        "avatarUrl" : 1,
+        "avatarUrl" : 25,
         "name" : "axel maccarini",
         "email": "root",
         "password": "root",
