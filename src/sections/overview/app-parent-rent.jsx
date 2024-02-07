@@ -33,6 +33,7 @@ export default function AppParentRent({
   operation,
   handelDelet,
   handelAdd,
+  date,
   loadig,
 }) {
   const [selected, setSelected] = useState(['2']);
@@ -119,7 +120,7 @@ export default function AppParentRent({
             variant="contained"
             disabled={pay.value === ''}
             onClick={() => {
-              handelAdd(pay.value, pay.description, operation);
+              handelAdd(pay.value, pay.description, operation, date.mese, date.anno);
               handleClose();
             }}
             color="success"
@@ -159,6 +160,7 @@ AppParentRent.propTypes = {
   handelAdd: PropTypes.func,
   operation: PropTypes.string,
   loadig: PropTypes.bool,
+  date: PropTypes.object,
 };
 
 // ----------------------------------------------------------------------
