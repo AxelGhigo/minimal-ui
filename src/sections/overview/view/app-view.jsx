@@ -39,7 +39,7 @@ export default function AppView() {
 
   const [loadig, setLoadig] = useState(true);
   const [currenDate, setCurrenDate] = useState(
-    `?mese=${DATA.getMonth()}&anno=${DATA.getFullYear()}`
+    `?mese=${DATA.getMonth() + 1}&anno=${DATA.getFullYear()}`
   );
 
   const handelDelet = (id) => {
@@ -171,6 +171,20 @@ export default function AppView() {
           />
         </Grid>
 
+        <Grid xs={12} md={6} lg={4}>
+          <AppCurrentVisits
+            title="Entrate/Uscite"
+            loadig={loadig}
+            chart={{
+              series: [
+                { label: 'Entrate', value: parseInt(payment.data.totAdd, 10) / 100 },
+                { label: 'Uscite', value: parseInt(payment.data.totSpent, 10) / 100 },
+                { label: 'quota mesile', value: 125 },
+              ],
+            }}
+          />
+        </Grid>
+
         <Grid xs={12} md={6} lg={8}>
           <AppWebsiteVisits
             title="Website Visits"
@@ -208,20 +222,6 @@ export default function AppView() {
                   fill: 'solid',
                   data: [30, 25, 36, 30, 45, 35, 64, 52, 59, 36, 39],
                 },
-              ],
-            }}
-          />
-        </Grid>
-
-        <Grid xs={12} md={6} lg={4}>
-          <AppCurrentVisits
-            title="Current Visits"
-            chart={{
-              series: [
-                { label: 'America', value: 4344 },
-                { label: 'Asia', value: 5435 },
-                { label: 'Europe', value: 1443 },
-                { label: 'Africa', value: 4443 },
               ],
             }}
           />
