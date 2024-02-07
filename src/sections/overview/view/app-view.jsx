@@ -35,8 +35,12 @@ export default function AppView() {
       spent: [],
     },
   });
+  const DATA = new Date();
 
   const [loadig, setLoadig] = useState(true);
+  const [currenDate, setCurrenDate] = useState(
+    `?mese=${DATA.getMonth()}&anno=${DATA.getFullYear()}`
+  );
 
   const handelDelet = (id) => {
     callPaymentAPI
@@ -44,7 +48,7 @@ export default function AppView() {
       .then((response) => response.json())
       .then(() =>
         callPaymentAPI
-          .getAll()
+          .getAll(currenDate)
           .then((response) => response.json())
           .then((data) => setPayment(data))
           .catch((error) => console.error(error))
@@ -52,26 +56,37 @@ export default function AppView() {
       .catch((error) => console.error(error));
   };
 
-  const handelAdd = (valore, description, operation) => {
-    const date = new Date();
-    console.log(valore, description, operation);
+  const handelAdd = (valore, description, operation, MESE, ANNO) => {
+    console.log(valore, description, operation, MESE, ANNO);
     callPaymentAPI
       .create({
         value: valore * 100,
         description,
         operation,
         createDate: nowDate(),
-        mese: date.getMonth() + 1,
-        anno: date.getFullYear(),
+        mese: MESE,
+        anno: ANNO,
       })
       .then((response) => response.json())
       .then(() =>
         callPaymentAPI
-          .getAll()
+          .getAll(currenDate)
           .then((response) => response.json())
           .then((data) => setPayment(data))
           .catch((error) => console.error(error))
       )
+      .catch((error) => console.error(error));
+  };
+
+  const handelSetMouth = (mese, anno) => {
+    console.log(mese, anno);
+    callPaymentAPI
+      .getAll(`?mese=${mese}&anno=${anno}`)
+      .then((response) => response.json())
+      .then((data) => {
+        setPayment(data);
+        setCurrenDate(`?mese=${mese}&anno=${anno}`);
+      })
       .catch((error) => console.error(error));
   };
 
@@ -97,9 +112,10 @@ export default function AppView() {
         <Grid xs={6} sm={6} md={3}>
           <AppWidgetSummary
             title="Mese corrente"
-            total={payment.data.mese}
+            total={payment.data}
             color="success"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}
+            handelSetMouth={handelSetMouth}
           />
         </Grid>
 
@@ -138,6 +154,7 @@ export default function AppView() {
             list={payment.data.add}
             operation="+"
             handelDelet={handelDelet}
+            date={{ mese: payment.data.mese, anno: payment.data.anno }}
             handelAdd={handelAdd}
             loadig={loadig}
           />
@@ -148,6 +165,7 @@ export default function AppView() {
             operation="-"
             list={payment.data.spent}
             handelDelet={handelDelet}
+            date={{ mese: payment.data.mese, anno: payment.data.anno }}
             handelAdd={handelAdd}
             loadig={loadig}
           />

@@ -1,6 +1,6 @@
 export const callPaymentAPI = {
-  getAll: async () =>
-    fetch('https://api-parent-pay.vercel.app/api/v1/posts', {
+  getAll: async (query = '') =>
+    fetch(`https://api-parent-pay.vercel.app/api/v1/posts${query}`, {
       method: 'GET',
       redirect: 'follow',
       headers: {
