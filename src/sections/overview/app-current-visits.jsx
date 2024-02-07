@@ -1,6 +1,8 @@
+/* eslint-disable import/no-unresolved */
 import PropTypes from 'prop-types';
 
 import Card from '@mui/material/Card';
+import Skeleton from '@mui/material/Skeleton';
 import CardHeader from '@mui/material/CardHeader';
 import { styled, useTheme } from '@mui/material/styles';
 
@@ -28,7 +30,7 @@ const StyledChart = styled(Chart)(({ theme }) => ({
 
 // ----------------------------------------------------------------------
 
-export default function AppCurrentVisits({ title, subheader, chart, ...other }) {
+export default function AppCurrentVisits({ title, subheader, chart, loadig, ...other }) {
   const theme = useTheme();
 
   const { colors, series, options } = chart;
@@ -80,16 +82,19 @@ export default function AppCurrentVisits({ title, subheader, chart, ...other }) 
 
   return (
     <Card {...other}>
-      <CardHeader title={title} subheader={subheader} sx={{ mb: 5 }} />
-
-      <StyledChart
-        dir="ltr"
-        type="pie"
-        series={chartSeries}
-        options={chartOptions}
-        width="100%"
-        height={280}
-      />
+      <CardHeader align="center" title={title} subheader={subheader} sx={{ mb: 5 }} />
+      {loadig ? (
+        <Skeleton sx={{ m: 6 }} variant="circular" align="center" width={280} height={280} />
+      ) : (
+        <StyledChart
+          dir="ltr"
+          type="pie"
+          series={chartSeries}
+          options={chartOptions}
+          width="100%"
+          height={280}
+        />
+      )}
     </Card>
   );
 }
@@ -98,4 +103,5 @@ AppCurrentVisits.propTypes = {
   chart: PropTypes.object,
   subheader: PropTypes.string,
   title: PropTypes.string,
+  loadig: PropTypes.bool,
 };
