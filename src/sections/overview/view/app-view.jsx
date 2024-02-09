@@ -2,11 +2,12 @@
 import { faker } from '@faker-js/faker';
 import { useState, useEffect } from 'react';
 
+import Chip from '@mui/material/Chip';
 import Container from '@mui/material/Container';
 import Grid from '@mui/material/Unstable_Grid2';
 import Typography from '@mui/material/Typography';
 
-import { nowDate } from 'src/utils/format-time';
+import { nowDate, numbToMounth } from 'src/utils/format-time';
 import { callPaymentAPI } from 'src/utils/lib/callAPI/payment';
 
 import Iconify from 'src/components/iconify';
@@ -44,7 +45,7 @@ export default function AppView() {
 
   const handelDelet = (id) => {
     callPaymentAPI
-      .delete(id)
+      .delete(id, currenDate)
       .then((response) => response.json())
       .then(() =>
         callPaymentAPI
@@ -53,6 +54,22 @@ export default function AppView() {
           .then((data) => setPayment(data))
           .catch((error) => console.error(error))
       )
+      .catch((error) => console.error(error));
+  };
+
+  const handelModify = (value, description, id, mese, anno) => {
+    console.log(value, description, id);
+    callPaymentAPI
+      .update(id, { value: value * 100, description, mese, anno })
+      .then((response) => response.json())
+      .then((res) => {
+        console.log(res);
+        callPaymentAPI
+          .getAll(currenDate)
+          .then((response) => response.json())
+          .then((data) => setPayment(data))
+          .catch((error) => console.error(error));
+      })
       .catch((error) => console.error(error));
   };
 
@@ -102,6 +119,18 @@ export default function AppView() {
   }, []);
 
   console.log(payment);
+
+  const eccedenza = (
+    <Typography>
+      eccedenza di {numbToMounth(payment.data.mese - 2)}
+      <Chip
+        sx={{ ml: 1 }}
+        label={`${payment.data.eccedenze / 100} €`}
+        color={payment.data.eccedenze - 12500 > 0 ? 'success' : 'error'}
+      />
+    </Typography>
+  );
+
   return (
     <Container maxWidth="xl">
       <Typography variant="h4" sx={{ mb: 5 }}>
@@ -154,9 +183,11 @@ export default function AppView() {
             list={payment.data.add}
             operation="+"
             handelDelet={handelDelet}
+            eccedenza={payment.data.eccedenze > 0 ? eccedenza : null}
             date={{ mese: payment.data.mese, anno: payment.data.anno }}
             handelAdd={handelAdd}
             loadig={loadig}
+            handelModify={handelModify}
           />
         </Grid>
         <Grid xs={12} sm={10} md={6}>
@@ -165,9 +196,11 @@ export default function AppView() {
             operation="-"
             list={payment.data.spent}
             handelDelet={handelDelet}
+            eccedenza={payment.data.eccedenze < 0 ? eccedenza : null}
             date={{ mese: payment.data.mese, anno: payment.data.anno }}
             handelAdd={handelAdd}
             loadig={loadig}
+            handelModify={handelModify}
           />
         </Grid>
 

@@ -28,16 +28,18 @@ import Iconify from 'src/components/iconify';
 
 export default function AppParentRent({
   title,
-  subheader,
   list,
   operation,
   handelDelet,
   handelAdd,
+  eccedenza,
   date,
   loadig,
+  handelModify,
 }) {
   const [selected, setSelected] = useState(['2']);
   const [open, setOpen] = useState(false);
+  const [edit, setEdit] = useState(false);
   const [pay, setPay] = useState({
     value: '',
     description: '',
@@ -55,6 +57,12 @@ export default function AppParentRent({
     setOpen(false);
   };
 
+  const handleEdit = ({ value, description, id }) => {
+    setPay({ value: value / 100, description });
+    setOpen(true);
+    setEdit(id);
+  };
+
   const handleClickComplete = (taskId) => {
     const tasksCompleted = selected.includes(taskId)
       ? selected.filter((value) => value !== taskId)
@@ -67,11 +75,22 @@ export default function AppParentRent({
     setPay({ ...pay, [e.target.name]: e.target.value });
   };
 
+  const handelNotify = () => {
+    if (edit) {
+      handelModify(pay.value, pay.description, edit, date.mese, date.anno);
+    } else {
+      handelAdd(pay.value, pay.description, operation, date.mese, date.anno);
+    }
+    setEdit(false);
+
+    handleClose();
+  };
+
   return (
     <Card sx={{ pb: 2 }}>
       <CardHeader
         title={title}
-        subheader={subheader}
+        subheader={eccedenza}
         action={
           <IconButton aria-label="settings" onClick={handleClickOpen}>
             <AddIcon />
@@ -119,10 +138,7 @@ export default function AppParentRent({
           <Button
             variant="contained"
             disabled={pay.value === ''}
-            onClick={() => {
-              handelAdd(pay.value, pay.description, operation, date.mese, date.anno);
-              handleClose();
-            }}
+            onClick={handelNotify}
             color="success"
           >
             Salva
@@ -145,6 +161,7 @@ export default function AppParentRent({
             onChange={() => handleClickComplete(task.id)}
             handelDelet={() => handelDelet(task.id)}
             operation={operation}
+            handleEdit={handleEdit}
           />
         ))
       )}
@@ -154,18 +171,19 @@ export default function AppParentRent({
 
 AppParentRent.propTypes = {
   list: PropTypes.array,
-  subheader: PropTypes.string,
   title: PropTypes.string,
   handelDelet: PropTypes.func,
   handelAdd: PropTypes.func,
+  handelModify: PropTypes.func,
   operation: PropTypes.string,
+  eccedenza: PropTypes.object,
   loadig: PropTypes.bool,
   date: PropTypes.object,
 };
 
 // ----------------------------------------------------------------------
 
-function TaskItem({ task, checked, onChange, operation, handelDelet }) {
+function TaskItem({ task, checked, onChange, operation, handelDelet, handleEdit }) {
   const [open, setOpen] = useState(null);
 
   const handleOpenMenu = (event) => {
@@ -174,11 +192,6 @@ function TaskItem({ task, checked, onChange, operation, handelDelet }) {
 
   const handleCloseMenu = () => {
     setOpen(null);
-  };
-
-  const handleEdit = () => {
-    handleCloseMenu();
-    console.info('EDIT', task.id);
   };
 
   return (
@@ -213,7 +226,12 @@ function TaskItem({ task, checked, onChange, operation, handelDelet }) {
         anchorOrigin={{ vertical: 'top', horizontal: 'left' }}
         transformOrigin={{ vertical: 'top', horizontal: 'right' }}
       >
-        <MenuItem onClick={handleEdit}>
+        <MenuItem
+          onClick={() => {
+            handleEdit(task);
+            handleCloseMenu();
+          }}
+        >
           <Iconify icon="solar:pen-bold" sx={{ mr: 2 }} />
           Edit
         </MenuItem>
@@ -239,4 +257,5 @@ TaskItem.propTypes = {
   onChange: PropTypes.func,
   task: PropTypes.object,
   handelDelet: PropTypes.func,
+  handleEdit: PropTypes.func,
 };

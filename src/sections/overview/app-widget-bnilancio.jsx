@@ -8,7 +8,8 @@ import Typography from '@mui/material/Typography';
 
 export default function AppWidgetBilancio({ title, total, icon, color = 'primary', sx, ...other }) {
   const bilancio = (
-    (total.add.map((i) => i.value).reduce((prev, curr) => prev + curr, 0) -
+    (total.add.map((i) => i.value).reduce((prev, curr) => prev + curr, 0) +
+      parseInt(total.eccedenze, 10) -
       total.spent.map((i) => i.value).reduce((prev, curr) => prev + curr, 0)) /
     100
   ).toFixed(2);

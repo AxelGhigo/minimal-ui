@@ -16,9 +16,17 @@ export const callPaymentAPI = {
       },
       body: JSON.stringify(obj),
     }),
-
-  delete: async (id) =>
+  update: async (id, obj) =>
     fetch(`https://api-parent-pay.vercel.app/api/v1/posts/${id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(obj),
+    }),
+
+  delete: async (id, query) =>
+    fetch(`https://api-parent-pay.vercel.app/api/v1/posts/${id}${query}`, {
       method: 'DELETE',
     }),
 };
