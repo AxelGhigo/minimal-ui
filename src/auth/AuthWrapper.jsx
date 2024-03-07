@@ -28,7 +28,7 @@ export const AuthWrapper = () => {
         .then((res) => {
           if (res.error) reject(new Error(res.error));
           console.log('res', res);
-          setUser({ ...res.data, isAuthenticated: true });
+          setUser({ ...res.data, isAuthenticated: true, jwt: res.accessToken, useremail: email });
           cookies.set(
             '__User',
             JSON.stringify({
@@ -38,6 +38,7 @@ export const AuthWrapper = () => {
               isAuthenticated: true,
             })
           );
+
           resolve('success');
         })
         .catch((error) => reject(new Error(error)));

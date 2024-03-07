@@ -56,26 +56,28 @@ export default function UserPage() {
 
   const [isLoadig, setIsLoading] = useState(true);
 
-  const { user } = AuthData();
+  const { user, logout } = AuthData();
+
+  console.log(AuthData());
 
   useEffect(() => {
     callUserAPI
       .getAll(user.jwt)
       .then((response) => response.json())
       .then((res) => {
-        if (res.checkToken.status !== 200) router.push('login');
+        if (res.checkToken.status !== 200) logout();
         setUsers(res.data);
         setIsLoading(false);
       })
       .catch((error) => console.error(error));
-  }, [router, user.jwt]);
+  }, [logout, router, user.jwt]);
 
   const handleDeletUser = (id) => {
     callUserAPI
       .delete(user.jwt, id)
       .then((response) => response.json())
       .then((res) => {
-        if (res.status !== 200) router.push('login');
+        if (res.status !== 200) logout();
         setUsers(res.data);
       })
       .catch((error) => console.error(error));
@@ -93,7 +95,7 @@ export default function UserPage() {
       })
       .then((response) => response.json())
       .then((res) => {
-        if (res.status !== 200) router.push('login');
+        if (res.status !== 200) logout();
         setUsers(res.data);
       })
       .catch((error) => console.error(error));
