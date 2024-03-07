@@ -1,15 +1,26 @@
-import { useState } from 'react';
+/* eslint-disable import/no-unresolved */
 import { faker } from '@faker-js/faker';
+/* eslint-disable import/no-cycle */
+import { useState, useEffect } from 'react';
 
 import Card from '@mui/material/Card';
 import Stack from '@mui/material/Stack';
 import Table from '@mui/material/Table';
 import Button from '@mui/material/Button';
+import Skeleton from '@mui/material/Skeleton';
+import TableRow from '@mui/material/TableRow';
+import TableCell from '@mui/material/TableCell';
 import Container from '@mui/material/Container';
 import TableBody from '@mui/material/TableBody';
 import Typography from '@mui/material/Typography';
 import TableContainer from '@mui/material/TableContainer';
 import TablePagination from '@mui/material/TablePagination';
+
+import { useRouter } from 'src/routes/hooks';
+
+import { callUserAPI } from 'src/utils/lib/callAPI/users';
+
+import { AuthData } from 'src/auth/AuthWrapper';
 
 import Iconify from 'src/components/iconify';
 import Scrollbar from 'src/components/scrollbar';
@@ -17,7 +28,6 @@ import Scrollbar from 'src/components/scrollbar';
 import FormAddUser from '../form-add-user';
 import TableNoData from '../table-no-data';
 import UserTableRow from '../user-table-row';
-import utenti from '../../../data/utenti.json';
 import UserTableHead from '../user-table-head';
 import TableEmptyRows from '../table-empty-rows';
 import UserTableToolbar from '../user-table-toolbar';
@@ -26,6 +36,8 @@ import { emptyRows, applyFilter, getComparator } from '../utils';
 // ----------------------------------------------------------------------
 
 export default function UserPage() {
+  const router = useRouter();
+
   const [page, setPage] = useState(0);
 
   const [order, setOrder] = useState('asc');
@@ -38,47 +50,66 @@ export default function UserPage() {
 
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const [users, setUsers] = useState(utenti);
+  const [users, setUsers] = useState([]);
 
   const [open, setOpen] = useState(false);
 
+  const [isLoadig, setIsLoading] = useState(true);
+
+  const { user } = AuthData();
+
+  useEffect(() => {
+    callUserAPI
+      .getAll(user.jwt)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.checkToken.status !== 200) router.push('login');
+        setUsers(res.data);
+        setIsLoading(false);
+      })
+      .catch((error) => console.error(error));
+  }, [router, user.jwt]);
+
   const handleDeletUser = (id) => {
-    setUsers(users.filter((u) => u.id !== id));
+    callUserAPI
+      .delete(user.jwt, id)
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.status !== 200) router.push('login');
+        setUsers(res.data);
+      })
+      .catch((error) => console.error(error));
   };
   const handleChangeUser = (row) => {
-    console.log(row);
-    setUsers(
-      users.map((user) => {
-        if (user.id === row.id) {
-          return {
-            id: row.id,
-            avatarUrl: row.avatar,
-            name: row.nome.value,
-            email: row.email.value,
-            password: row.password.value,
-            isVerified: row.verified === 'yes',
-            status: row.active ? 'active' : 'banned',
-            role: row.roles.value,
-          };
-        }
-        return user;
+    callUserAPI
+      .update(user.jwt, row.id, {
+        avatarUrl: row.avatar,
+        name: row.nome.value,
+        email: row.email.value,
+        password: row.password.value,
+        isVerified: row.verified,
+        status: row.active ? 'active' : 'banned',
+        role: row.roles.value,
       })
-    );
+      .then((response) => response.json())
+      .then((res) => {
+        if (res.status !== 200) router.push('login');
+        setUsers(res.data);
+      })
+      .catch((error) => console.error(error));
   };
 
-  console.log(users);
-  const handleAddUser = (user) => {
-    console.log(user);
+  const handleAddUser = (utente) => {
     setUsers(
       users.concat({
         id: faker.string.uuid(),
-        avatarUrl: user.avatar,
-        name: user.nome.value,
-        email: user.email.value,
-        password: user.password.value,
-        isVerified: user.verified,
-        status: user.active ? 'active' : 'banned',
-        role: user.roles.value,
+        avatarUrl: utente.avatar,
+        name: utente.nome.value,
+        email: utente.email.value,
+        password: utente.password.value,
+        isVerified: utente.verified,
+        status: utente.active ? 'active' : 'banned',
+        role: utente.roles.value,
       })
     );
     setOpen(false);
@@ -152,7 +183,7 @@ export default function UserPage() {
           color="inherit"
           startIcon={<Iconify icon="eva:plus-fill" />}
         >
-          New User
+          New user
         </Button>
       </Stack>
 
@@ -185,33 +216,51 @@ export default function UserPage() {
                   { id: '' },
                 ]}
               />
-              <TableBody>
-                {dataFiltered
-                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row) => (
-                    <UserTableRow
-                      key={row.id}
-                      name={row.name}
-                      role={row.role}
-                      psw={row.password}
-                      status={row.status}
-                      email={row.email}
-                      avatarUrl={row.avatarUrl}
-                      isVerified={row.isVerified}
-                      selected={selected.indexOf(row.name) !== -1}
-                      handleClick={(event) => handleClick(event, row.name)}
-                      handleDeletUser={() => handleDeletUser(row.id)}
-                      handleChangeUser={(event) => handleChangeUser({ ...event, id: row.id })}
-                    />
+
+              {isLoadig ? (
+                <TableBody>
+                  {[...Array(3)].map(() => (
+                    <TableRow>
+                      <TableCell>
+                        <Skeleton animation="wave" variant="circular" width={40} height={40} />
+                      </TableCell>
+                      {[...Array(6)].map(() => (
+                        <TableCell>
+                          <Skeleton />
+                        </TableCell>
+                      ))}
+                    </TableRow>
                   ))}
+                </TableBody>
+              ) : (
+                <TableBody>
+                  {dataFiltered
+                    .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                    .map((row) => (
+                      <UserTableRow
+                        key={row.id}
+                        name={row.name}
+                        role={row.role}
+                        psw={row.password}
+                        status={row.status}
+                        email={row.email}
+                        avatarUrl={row.avatarUrl}
+                        isVerified={row.isVerified}
+                        selected={selected.indexOf(row.name) !== -1}
+                        handleClick={(event) => handleClick(event, row.name)}
+                        handleDeletUser={() => handleDeletUser(row.id)}
+                        handleChangeUser={(event) => handleChangeUser({ ...event, id: row.id })}
+                      />
+                    ))}
 
-                <TableEmptyRows
-                  height={77}
-                  emptyRows={emptyRows(page, rowsPerPage, users.length)}
-                />
+                  <TableEmptyRows
+                    height={77}
+                    emptyRows={emptyRows(page, rowsPerPage, users.length)}
+                  />
 
-                {notFound && <TableNoData query={filterName} />}
-              </TableBody>
+                  {notFound && <TableNoData query={filterName} />}
+                </TableBody>
+              )}
             </Table>
           </TableContainer>
         </Scrollbar>
