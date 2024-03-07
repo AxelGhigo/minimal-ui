@@ -140,7 +140,7 @@ export default function AppView() {
       <Grid container spacing={2}>
         <Grid xs={6} sm={6} md={3}>
           <AppWidgetSummary
-            title="Mese corrente"
+            title="Mese"
             total={payment.data}
             color="success"
             icon={<img alt="icon" src="/assets/icons/glass/ic_glass_bag.png" />}

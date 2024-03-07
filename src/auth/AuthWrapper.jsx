@@ -31,7 +31,12 @@ export const AuthWrapper = () => {
           setUser({ ...res.data, isAuthenticated: true });
           cookies.set(
             '__User',
-            JSON.stringify({ ...res.data, useremail: email, isAuthenticated: true })
+            JSON.stringify({
+              ...res.data,
+              jwt: res.accessToken,
+              useremail: email,
+              isAuthenticated: true,
+            })
           );
           resolve('success');
         })

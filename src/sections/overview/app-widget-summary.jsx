@@ -24,19 +24,20 @@ export default function AppWidgetSummary({
   return (
     <Card
       component={Stack}
-      spacing={1}
+      spacing={0}
       direction="row"
-      justifyContent="center"
+      justifyContent="space-between"
       sx={{
         px: 1,
-        py: 2,
+        py: 2.7,
         borderRadius: 2,
         ...sx,
       }}
       {...other}
     >
       <IconButton
-        aria-label="delete"
+        aria-label="last"
+        style={{ paddingRight: 0 }}
         onClick={() =>
           handelSetMouth(
             total.mese === 1 ? 12 : total.mese - 1,
@@ -47,22 +48,19 @@ export default function AppWidgetSummary({
       >
         <ArrowBackIosNewIcon fontSize="inherit" />
       </IconButton>
-      <Stack spacing={1.5} align="center">
+      <Stack style={{ justifyContent: 'center' }} align="center">
         <Typography variant="h4">{numbToMounth(total.mese - 1)}</Typography>
-
-        <Typography variant="subtitle2" sx={{ color: 'text.disabled' }}>
-          {title}
-        </Typography>
       </Stack>
       <IconButton
-        aria-label="delete"
+        aria-label="next"
+        size="large"
+        style={{ paddingLeft: 0 }}
         onClick={() =>
           handelSetMouth(
             total.mese === 12 ? 1 : total.mese + 1,
             total.mese === 12 ? parseInt(total.anno, 10) + 1 : total.anno
           )
         }
-        size="large"
       >
         <ArrowForwardIosIcon fontSize="inherit" />
       </IconButton>
